@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import OlvidoClavePresenter from './OlvidoClavePresenter';
+import actions from './../../state/actions/actions';
+import * as selectors from './../../state/reducers/reducers';
 
 class OlvidoClave extends Component {
   render() {
@@ -13,9 +15,15 @@ class OlvidoClave extends Component {
 
 OlvidoClave.propTypes = {};
 
-const mapStateToProps = (state, ownProps) => ({});
+const mapStateToProps = (state, ownProps) => ({
+  currentUser: selectors.getCurrentUser(state)  
+});
 
-const mapDispatchToProps = (dispatch) => ({});
+const mapDispatchToProps = (dispatch) => ({
+	forgotPassword: (email, userData) => {
+    return dispatch(actions.context.forgotPassword(email, userData));
+  }
+});
 
 const OlvidoClaveContainer = connect(
   mapStateToProps,

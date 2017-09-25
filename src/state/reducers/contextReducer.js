@@ -1,7 +1,8 @@
 import {
   SET_LOGIN_CONTEXT,
-  SET_LOGOUT_CONTEXT,
   SET_CURRENT_COMPONENT,
+  SET_CONTEXT_MODE,
+  SET_LOGOUT_CONTEXT,
   HANDLE_CALENDAR_SEARCH_CHANGE,
   HANDLE_NOTIFICACIONES_SEARCH_CHANGE,
   HANDLE_MENSAJES_SEARCH_CHANGE,
@@ -16,24 +17,31 @@ export default (
     calendarSearch: '',
     notificacionesSearch: '',
     mensajesSearch: '',
-    calendarioFiltro: {id: 0, name: 'Todos'},
+    calendarioFiltro: 'Todos',
   },
   action
 ) => {
   switch (action.type) {
-    case SET_LOGIN_CONTEXT: {
-      return Object.assign({}, state, {
-        currentUser: action.user
-      });
-    }
     case SET_LOGOUT_CONTEXT: {
-      return Object.assign({}, state, {
+      return {
         currentUser: {},
         currentComponent: 'Calendario',
         calendarSearch: '',
         notificacionesSearch: '',
         mensajesSearch: '',
-        calendarioFiltro: {id: 0, name: 'Todos'},
+        calendarioFiltro: 'Todos',
+      };
+    }
+    case SET_CONTEXT_MODE: {
+      return Object.assign({}, state, {
+        currentUser: Object.assign({}, state.currentUser, {
+          mode: action.mode
+        })
+      });      
+    }
+    case SET_LOGIN_CONTEXT: {
+      return Object.assign({}, state, {
+        currentUser: action.user
       });
     }
     case SET_CURRENT_COMPONENT: {

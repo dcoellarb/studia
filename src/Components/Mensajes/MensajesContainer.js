@@ -8,23 +8,33 @@ class Mensajes extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { loading: true};
+    this.state = { loading: false};
   }
 
   componentWillMount() {
-    this.props.fetchMensajes(0, this.props.mensajesSearch, this.props.currentUser)
-    .then(() => {
-      this.setState({ loading: false });
+    this.setState({ loading: true }, () => {
+      this.props.fetchMensajes(this.props.selectedEstudiante, 0, this.props.mensajesSearch, this.props.currentUser)
+      .then(
+        () => {
+          this.setState({ loading: false });
+        },
+        (error) => {
+          this.setState({ loading: false });
+        }        
+      );
     });
   }
 
   componentWillUpdate(nextProps, nextState) {
     if (nextProps.mensajesSearch !== this.props.mensajesSearch) {
       this.setState({loading: true}, () => {
-        this.props.fetchMensajes(0, nextProps.mensajesSearch, this.props.currentUser)
+        this.props.fetchMensajes(this.props.selectedEstudiante, 0, nextProps.mensajesSearch, this.props.currentUser)
         .then(() => {
           this.setState({ loading: false });
-        });
+        })
+        .catch((error) => {
+          this.setState({ loading: false });
+        });          
       });
     }
   }  
@@ -44,12 +54,13 @@ const mapStateToProps = (state, ownProps) => ({
 	navigator: ownProps.navigator,
 	mensajesOnly: ownProps.mensajesOnly,
   mensajes: selectors.getMensajes(state),
-  mensajesSearch: selectors.getMensajesSearch(state)  
+  mensajesSearch: selectors.getMensajesSearch(state),
+  selectedEstudiante: selectors.getSelectedEstudiante(state)  
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  fetchMensajes: (page, search, userData) => {
-    return dispatch(actions.mensajes.fetchMensajes(page, search, userData));  
+  fetchMensajes: (selectedEstudiante, page, search, userData) => {
+    return dispatch(actions.mensajes.fetchMensajes(selectedEstudiante, page, search, userData));  
   },
   fetchMensajeComentarios: (id, userData) => {
     return dispatch(actions.mensajes.fetchMensajeComentarios(id, userData));  

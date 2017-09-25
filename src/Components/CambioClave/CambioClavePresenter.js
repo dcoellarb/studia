@@ -5,7 +5,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Dimensions
+  Dimensions,
+  BackAndroid
 } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import globalStyles from './../../styles/styles';
@@ -45,10 +46,34 @@ class CambioClavePresenter extends Component {
     }
 
     this.handleConfirm = this.handleConfirm.bind(this);
+    this.handleBack = this.handleBack.bind(this);
+  }
+
+  componentWillMount() {
+    BackAndroid.addEventListener('hardwareBackPress', this.handleBack);
+  }
+
+  handleBack() {
+    this.props.navigator.pop();
+    return true;
   }
 
   handleConfirm() {
-
+    if (this.state.password.length > 0 && this.state.newPassword.length > 0 && this.state.newConfirmPassword.length > 0) {
+      if (this.state.newPassword === this.state.newConfirmPassword) {
+        this.props.changePassword(this.state.password, this.state.newPassword, this.props.currentUser)
+        .then(
+          () => {
+            this.props.navigator.push({index: 99, title: 'Studia'});       
+          },
+          (error) => {
+            alert('No se pudo cambiar la clave, por favor contactenos');
+          }
+        );
+      } else {
+        alert('las nuevas claves no coinciden');
+      }
+    }
   }
 
   handleOlvideClave() {
@@ -71,8 +96,8 @@ class CambioClavePresenter extends Component {
         </View>
         <View style={styles.section}>
           <TextInput
-            value={this.state.password}
-            onChange={(event) => this.setState({password: event.nativeEvent.text})}
+            value={this.state.newPassword}
+            onChange={(event) => this.setState({newPassword: event.nativeEvent.text})}
             secureTextEntry={true}
             placeholder="Nueva Clave"
             placeholderTextColor={globalColors.primary}
@@ -80,8 +105,8 @@ class CambioClavePresenter extends Component {
             style={{color: globalColors.primary, height: 40}}
           />
           <TextInput
-            value={this.state.password}
-            onChange={(event) => this.setState({password: event.nativeEvent.text})}
+            value={this.state.newConfirmPassword}
+            onChange={(event) => this.setState({newConfirmPassword: event.nativeEvent.text})}
             secureTextEntry={true}
             placeholder="Confirmar nueva clave"
             placeholderTextColor={globalColors.primary}

@@ -51,7 +51,9 @@ class MainPresenter extends Component {
   
   selectedMenuChange(option) {
     this.props.setCurrentComponent(option);
-    this.setState({drawerOpen: false, selectedMenu: option});
+    this.setState({drawerOpen: false, selectedMenu: option}, () => {
+      this.props.closedDrawer();
+    });
   }
 
   render() {

@@ -13,18 +13,18 @@ class Main extends Component {
   }
 
   componentWillMount() {
-    Promise.all([
-      this.props.fetchProfiles(this.props.currentUser),
-      this.props.fetchEstudiantes(this.props.currentUser)
-    ])
+    this.props.fetchProfiles(this.props.currentUser)
+    .then(() => {
+      return this.props.fetchEstudiantes(this.props.currentUser)
+    })
     .then(
       (results) => {
         this.setState({loading: false});
       },
       error => {
-        console.log(error);
+        this.setState({ loading: false });
       }
-    );
+    )
   }
    
   render() {

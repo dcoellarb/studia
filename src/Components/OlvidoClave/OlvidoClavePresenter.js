@@ -5,7 +5,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Dimensions
+  Dimensions,
+  BackAndroid
 } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import globalStyles from './../../styles/styles';
@@ -35,15 +36,34 @@ class OlvidoClavePresenter extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      password: '',
-      newPassword: '',
-      newConfirmPassword: ''
+      email: '',
     }
 
     this.handleConfirm = this.handleConfirm.bind(this);
+    this.handleBack = this.handleBack.bind(this);
+  }
+
+  componentWillMount() {
+    BackAndroid.addEventListener('hardwareBackPress', this.handleBack);
+  }
+
+  handleBack() {
+    this.props.navigator.pop();
+    return true;
   }
 
   handleConfirm() {
+    this.props.forgotPassword(this.state.email, this.props.currentUser)
+    .then(
+      () => {
+        alert('Se envió un correo con las indicaciones para restableser tu contraseña.');
+        this.props.navigator.pop();
+      },
+      (error) => {
+        debugger;        
+        alert('No se pudo enviar el correo, por favor contactenos');
+      }
+    )
   }
 
   render() {
@@ -55,6 +75,7 @@ class OlvidoClavePresenter extends Component {
           </Text>
           <TextInput
             value={this.state.password}
+            onChange={(event) => this.setState({email: event.nativeEvent.text})}            
             placeholder="Ingrese su email."
             placeholderTextColor={globalColors.primary}
             underlineColorAndroid={globalColors.primary}

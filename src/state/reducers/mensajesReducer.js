@@ -21,7 +21,7 @@ export default (
       const message = state.find(m => m.id === action.id);
       const index = state.indexOf(message);
       const newMessage = Object.assign({}, message, {
-        comentarios: action.comentarios
+        childs: action.comentarios
       });
       return [
         ...state.slice(0, index),

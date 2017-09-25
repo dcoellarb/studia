@@ -22,17 +22,14 @@ export const fetchEstudiantes = (userData) => (dispatch) => {
       if (response.status === 200) {
         return response.json()  
       } else {
-        reject({code: response.status, error: 'Server error'})
+        throw `Server error status: ${response.status}`
       }
     })
-    .then(responseJson => {
-      const estudiantes = responseJson.students.map(s => Object.assign({},s,{
-        imageUrl: `${config.host}/mobile${s.imageUrl}`
-      }))
-      dispatch(contextActions.setSelectedEstudiante(estudiantes[0]));
-      dispatch(mergeEstuadiantes(estudiantes));
-      resolve(estudiantes);
-    })
+    .then(responseJSON => {
+      dispatch(contextActions.setSelectedEstudiante(responseJSON.students[0]));
+      dispatch(mergeEstuadiantes(responseJSON.students));
+      resolve(responseJSON.students);
+    })        
     .catch(err => {
       reject(err)
     });  

@@ -19,6 +19,7 @@ import CambioClave from './../CambioClave/CambioClaveContainer';
 import Comentar from './../Comentar/ComentarContainer';
 import OlvidoClave from './../OlvidoClave/OlvidoClaveContainer';
 import StudiaWebView from './../StudiaWebView/StudiaWebView';
+import PDFView from './../PDFView/PDFView';
 import { globalColors } from './../../styles/globals';
 
 const stylesObjects = {
@@ -36,6 +37,15 @@ const stylesObjects = {
     color: globalColors.textInverse,
     fontSize: 20,
     marginTop: 14
+  },
+  barTextDoubleTop: {
+    color: globalColors.textInverse,
+    fontSize: 12,
+  },
+  barTextDoubleBottom: {
+    color: globalColors.textInverse,
+    fontSize: 9,
+    marginTop: 2
   },
   barTextSmall: {
     color: globalColors.textInverse,
@@ -57,7 +67,8 @@ class AppPresenter extends Component {
         showSearchNotificaciones: false,
         showSearchMensajes: false,
         showSearchCalenario: false,
-        showFiltrosCalendario: false
+        showFiltrosCalendario: false,
+        drawerOpen: false,
       }
 
       this.setDrawerRef = this.setDrawerRef.bind(this);
@@ -76,14 +87,22 @@ class AppPresenter extends Component {
       this.handleCalendarioFiltroChange = this.handleCalendarioFiltroChange.bind(this);
   }
 
-  setDrawerRef(openDrawer) {
-    this.openDrawer = openDrawer
+  setDrawerRef(openDrawerRef) {
+    this.openDrawerRef = openDrawerRef
   }
 
   openDrawer() {
-    if (this.openDrawer) {
-      this.openDrawer(true);
-    } 
+    if (this.openDrawerRef) {
+      if (this.state.drawerOpen) {
+        this.setState({ drawerOpen: false }, ( )=> {
+          this.openDrawerRef(false);
+        });
+      } else {
+        this.setState({ drawerOpen: true }, ( )=> {
+          this.openDrawerRef(true);
+        });
+      }
+    }
   }
 
   toogleSearchMensajes() {
@@ -175,6 +194,12 @@ class AppPresenter extends Component {
             <Icon name='arrow-back' size={20} color={'white'} />
           </TouchableOpacity>
         );
+      case 101: 
+        return (
+          <TouchableOpacity onPress={() => navigator.pop()} style={styles.barAction}>
+            <Icon name='arrow-back' size={20} color={'white'} />
+          </TouchableOpacity>
+        );
       default: 
         return (<View />);
     }
@@ -193,7 +218,7 @@ class AppPresenter extends Component {
               </TouchableOpacity>
               <TouchableOpacity onPress={this.toogleFiltrosCalendario} style={{marginLeft: 20}}>
                 <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={styles.barTextSmall}>{calendarioFiltro.name}</Text>
+                  <Text style={styles.barTextSmall}>{calendarioFiltro}</Text>
                   <Icon name='arrow-drop-down' size={20} color={'white'} style={{marginTop: 20}} />
                 </View>
               </TouchableOpacity>
@@ -285,6 +310,13 @@ class AppPresenter extends Component {
           }
         }
         return barTitle;
+      case 1:
+        return (
+          <View style={{height: 56, justifyContent: 'center'}}>
+            <Text style={styles.barTextDoubleTop}>{route.title}</Text>
+            <Text style={styles.barTextDoubleBottom}>{route.subtitle}</Text>
+          </View>
+        );
       default: 
         return (<Text style={styles.barText}>{route.title}</Text>);
     }    
@@ -293,7 +325,7 @@ class AppPresenter extends Component {
   renderScene(route, navigator) {
     switch (route.index) {
       case 0:
-        return (<Main navigator={navigator} setDrawerRef={this.setDrawerRef} />);
+        return (<Main navigator={navigator} setDrawerRef={this.setDrawerRef} closedDrawer={(open) => this.setState({drawerOpen: open})} />);
       case 1:
         return (<TareaDetalle navigator={navigator} tarea={route.tarea} />);
       case 2:
@@ -301,13 +333,15 @@ class AppPresenter extends Component {
       case 3:
         return (<CambioClave navigator={navigator} />);
       case 4:
-        return (<Comentar navigator={navigator} />);
+        return (<Comentar navigator={navigator} tarea={route.tarea} message={route.message} type={route.type} />);
       case 5:
         return (<OlvidoClave navigator={navigator} />);
       case 99:
         return (<Login navigator={navigator} />);
       case 100:
         return (<StudiaWebView navigator={navigator} url={route.url} userData={route.userData} />);
+      case 101:
+        return (<PDFView navigator={navigator} url={route.url} userData={route.userData} />);
       default: 
         return (<Main navigator={navigator} setDrawerRef={this.setDrawerRef} />);
     }
@@ -328,13 +362,13 @@ class AppPresenter extends Component {
       if (this.state.showFiltrosCalendario) {
         filtrosCalendario = (
           <View style={{position: 'absolute', top: 56, right: 10, padding: 20,backgroundColor: 'black'}}>
-            <TouchableOpacity onPress={() => this.handleCalendarioFiltroChange({id: 0, name: 'Todos'})}>
+            <TouchableOpacity onPress={() => this.handleCalendarioFiltroChange('Todos')}>
               <Text style={styles.filtrosText}>Todos</Text>
               <View style={{backgroundColor: 'white', height: 1, marginTop: 5, marginBottom: 5}}/>
             </TouchableOpacity>
             {this.props.tiposTareas.map(tt =>
               <TouchableOpacity onPress={() => this.handleCalendarioFiltroChange(tt)}>
-                <Text style={styles.filtrosText}>{tt.name}</Text>
+                <Text style={styles.filtrosText}>{tt}</Text>
                 <View style={{backgroundColor: 'white', height: 1, marginTop: 5, marginBottom: 5}}/>
               </TouchableOpacity>
             )}

@@ -9,7 +9,7 @@ export default (
 ) => {
   switch (action.type) {   
     case MERGE_INASISTENCIAS: {
-      const filteredInasistencias = state.filter(i => student.id === action.selectedEstudiante.id)
+      const filteredInasistencias = state.filter(i => i.id === action.selectedEstudiante.id)
     	return [...filteredInasistencias, ...action.inasistencias]
     }
     // Intial state

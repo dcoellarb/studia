@@ -14,7 +14,8 @@ export const fetchInasistencias = (selectedEstudiante, userData) => (dispatch) =
     const headers = new Headers();
     headers.append("token_client", userData.token);
     headers.append("Content-Type", "application/json");
-    fetch(`${config.host}/mobile/student/${selectedEstudiante.id}/inasistance`, {
+    const url = `${config.host}/mobile/student/${selectedEstudiante.id}/inasistance`;
+    fetch(url, {
       method: 'get',
       headers: headers
     }) 
@@ -22,12 +23,14 @@ export const fetchInasistencias = (selectedEstudiante, userData) => (dispatch) =
       if (response.status === 200) {
         return response.json()  
       } else {
-        reject({code: response.status, error: 'Server error'})
+        throw `Server error status: ${response.status}`        
       }
     })
     .then(responseJson => {
-      const inasistencias = responseJson.Inasistances.map(i => Object.assign({}, i, {
-        date: i.date && i.date.length > 0 ? new Date(`${i.date.replace(" ","T")}Z`) : undefined,
+      const inasistencias = responseJson.inasistances
+      .filter(i => i.date && i.date.length > 0)
+      .map(i => Object.assign({}, i, {
+        date: new Date(`${i.date.replace(" ","T")}Z`),
         studentId: selectedEstudiante.id
       }));
       dispatch(mergeInasistencias(selectedEstudiante, inasistencias));

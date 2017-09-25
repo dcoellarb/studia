@@ -4,7 +4,8 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  BackAndroid
 } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import globalStyles from './../../styles/styles';
@@ -31,6 +32,51 @@ const stylesObjects = {
 const styles = StyleSheet.create(stylesObjects);
 
 class ComentarPresenter extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      comentario: ''
+    }
+
+    this.handleComentar = this.handleComentar.bind(this);
+    this.handleBack = this.handleBack.bind(this);
+  }
+
+  componentWillMount() {
+    BackAndroid.addEventListener('hardwareBackPress', this.handleBack);
+  }
+
+  handleBack() {
+    this.props.navigator.pop();
+    return true;
+  }
+
+  handleComentar(value) {
+    if (this.state.comentario.length > 0) {
+      if (this.props.type === 'MessageComment') {
+        this.props.insertComentarioMessage(this.props.selectedEstudiante, this.props.message, this.state.comentario, this.props.currentUser)
+        .then(
+          () => {
+            this.props.navigator.pop();
+          },
+          (error) => {
+            alert('No se pudo enviar el comentario, por favor contactenos');
+          }
+        );        
+      } else {
+        this.props.insertComentarioTarea(this.props.selectedEstudiante, this.props.tarea, this.state.comentario, this.props.currentUser)
+        .then(
+          () => {
+            this.props.navigator.pop();
+          },
+          (error) => {
+            alert('No se pudo enviar el comentario, por favor contactenos');
+          }
+        );  
+      }
+    }
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -40,6 +86,8 @@ class ComentarPresenter extends Component {
             multiline={true}
             numberOfLines={4}
             style={{ height: 100 }}
+            value={this.state.comentario}
+            onChange={(event) => this.setState({comentario: event.nativeEvent.text})}
           />
         </View>
         <View style={{alignItems: 'center', marginTop: 10, marginBottom: 10}}>

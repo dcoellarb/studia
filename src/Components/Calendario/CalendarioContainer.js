@@ -9,11 +9,11 @@ class Calendario extends Component {
     super(props);
 
     let fechaInicio = new Date();
-    fechaInicio = new Date(fechaInicio.setMonth(fechaInicio.getMonth() - 1));
+    fechaInicio = new Date(fechaInicio.setMonth(fechaInicio.getMonth() - 6));
     fechaInicio = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), 1);
     
     let fechaFin = new Date();
-    fechaFin =  new Date(fechaFin.setMonth(fechaFin.getMonth() + 1));
+    fechaFin =  new Date(fechaFin.setMonth(fechaFin.getMonth() + 6));
     fechaFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 0);
     this.state = {
       fechaInicio,
@@ -23,30 +23,42 @@ class Calendario extends Component {
   }
 
   componentWillMount() {
-    Promise.all([
-      this.props.fetchTiposTareas(this.props.selectedEstudiante, this.props.currentUser),
-      this.props.fetchTareas(this.props.selectedEstudiante, this.state.fechaInicio,  this.state.fechaFin, this.props.calendarSearch, this.props.calendarioFiltro, this.props.currentUser)
-    ])
-    .then(() => {
+    if (this.props.selectedEstudiante && this.props.currentUser) {
+      Promise.all([
+        this.props.fetchTiposTareas(this.props.selectedEstudiante, this.props.currentUser),
+        this.props.fetchTareas(this.props.selectedEstudiante, this.state.fechaInicio,  this.state.fechaFin, this.props.calendarSearch, this.props.calendarioFiltro, this.props.currentUser)
+      ])
+      .then(() => {
+        this.setState({ loading: false });
+      })
+      .catch((error) => {
+        this.setState({ loading: false });
+      });
+    } else {
       this.setState({ loading: false });
-    })
+    }
   }
 
   componentWillUpdate(nextProps, nextState) {
-    if (nextProps.calendarSearch !== this.props.calendarSearch) {
-      this.setState({loading: true}, () => {
-        this.props.fetchTareas(this.props.selectedEstudiante, this.state.fechaInicio,  this.state.fechaFin, nextProps.calendarSearch, nextProps.calendarioFiltro, this.props.currentUser)
-        .then(() => {
-          this.setState({ loading: false });
-        })        
-      });
-    } else if (nextProps.calendarioFiltro !== this.props.calendarioFiltro) {
-      this.setState({loading: true}, () => {
-        this.props.fetchTareas(this.props.selectedEstudiante, this.state.fechaInicio,  this.state.fechaFin, nextProps.calendarSearch, nextProps.calendarioFiltro, this.props.currentUser)
-        .then(() => {
-          this.setState({ loading: false });
-        })
-      });
+    if (this.props.selectedEstudiante && this.props.currentUser) {
+      if (nextProps.calendarSearch !== this.props.calendarSearch) {
+        this.setState({loading: true}, () => {
+          this.props.fetchTareas(this.props.selectedEstudiante, this.state.fechaInicio,  this.state.fechaFin, nextProps.calendarSearch, nextProps.calendarioFiltro, this.props.currentUser)
+          .then(() => {
+            this.setState({ loading: false });
+          })
+          .catch((error) => {
+            this.setState({ loading: false });
+          })
+        });
+      } else if (nextProps.calendarioFiltro !== this.props.calendarioFiltro) {
+        this.setState({loading: true}, () => {
+          this.props.fetchTareas(this.props.selectedEstudiante, this.state.fechaInicio,  this.state.fechaFin, nextProps.calendarSearch, nextProps.calendarioFiltro, this.props.currentUser)
+          .then(() => {
+            this.setState({ loading: false });
+          })
+        });
+      }
     }
   }
 

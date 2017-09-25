@@ -12,19 +12,25 @@ class Notificaciones extends Component {
   }
 
   componentWillMount() {
-    this.props.fetchNotificaciones(0, this.props.notificacionesSearch, this.props.currentUser)
+    this.props.fetchNotificaciones(this.props.selectedEstudiante, 0, this.props.notificacionesSearch, this.props.currentUser)
     .then(() => {
       this.setState({ loading: false });
     })
+    .catch((error) => {
+      this.setState({ loading: false });
+    });  
   }
 
   componentWillUpdate(nextProps, nextState) {
     if (nextProps.notificacionesSearch !== this.props.notificacionesSearch) {
       this.setState({loading: true}, () => {
-        this.props.fetchNotificaciones(0, nextProps.notificacionesSearch, this.props.currentUser)
+        this.props.fetchNotificaciones(this.props.selectedEstudiante, 0, nextProps.notificacionesSearch, this.props.currentUser)
         .then(() => {
           this.setState({ loading: false });
-        });
+        })
+        .catch((error) => {
+          this.setState({ loading: false });
+        });          
       });
     }
   }  
@@ -44,12 +50,13 @@ const mapStateToProps = (state, ownProps) => ({
 	navigator: ownProps.navigator,
 	mensajesOnly: ownProps.mensajesOnly,
   notificaciones: selectors.getNotificaciones(state),
-  notificacionesSearch: selectors.getNotificacionesSearch(state)  
+  notificacionesSearch: selectors.getNotificacionesSearch(state),
+  selectedEstudiante: selectors.getSelectedEstudiante(state)
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  fetchNotificaciones: (page, search, userData) => {
-    return dispatch(actions.notificaciones.fetchNotificaciones(page, search, userData));  
+  fetchNotificaciones: (selectedEstudiante, page, search, userData) => {
+    return dispatch(actions.notificaciones.fetchNotificaciones(selectedEstudiante, page, search, userData));  
   }  
 });
 

@@ -26,7 +26,7 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(actions.context.changeProfile(profile, userData))
   },
   cerrarSesion: () => {
-    dispatch(actions.context.logout());
+    return dispatch(actions.context.logout());
   }
 });
 

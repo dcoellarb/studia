@@ -12,8 +12,14 @@ export const mergeTareas = (tareas, selectedEstudiante, fechaInicio, fechaFin) =
   fechaFin
 });
 
+export const mergeTareaComentarios = (id, comentarios) => ({
+  type: MERGE_TAREA_COMENTARIOS,
+  id,
+  comentarios
+});
+
 const formatFecha = (fecha) => {
-  return `${fecha.getFullYear()}-${fecha.getMonth() < 10 ? '0' + fecha.getMonth() : fecha.getMonth()}-${fecha.getDate() < 10 ? '0' + fecha.getDate() : fecha.getDate()}`;
+  return `${fecha.getFullYear()}-${fecha.getMonth() + 1 < 10 ? `0${fecha.getMonth() + 1}` : `${fecha.getMonth() + 1}`}-${fecha.getDate() < 10 ? '0' + fecha.getDate() : fecha.getDate()}`;
 }
 
 export const fetchTareas = (selectedEstudiante, fechaInicio, fechaFin, search, type, userData) => (dispatch) => { 
@@ -27,8 +33,8 @@ export const fetchTareas = (selectedEstudiante, fechaInicio, fechaFin, search, t
     if (search && search.length > 0) {
       url = `${url}&search=${search}`;
     }
-    if (type && type.id !== 0) {
-      url = `${url}&activity_type=${type.id}`;
+    if (type && type !== 'Todos') {
+      url = `${url}&activity_type=${type}`;
     }
     fetch(url, {
       method: 'get',
@@ -38,15 +44,18 @@ export const fetchTareas = (selectedEstudiante, fechaInicio, fechaFin, search, t
       if (response.status === 200) {
         return response.json()  
       } else {
-        reject({code: response.status, error: 'Server error'})
+        throw `Server error status: ${response.status}`
       }
     })
     .then(responseJson => {
-      const tareas = responseJson.activities.map(a => Object.assign({},a, {
-        //date_limit: a.date_limit !== "" ? new Date(`${m.date_limit.replace(" ","T")}Z`) : null //TODO uncomment after testing
-        date_limit: new Date(),   //TODO remove after testing
-        studentId: selectedEstudiante.id
-      }));
+      let tareas = []
+      if (responseJson && responseJson.activities) {
+        tareas = responseJson.activities.map(a => Object.assign({},a, {
+          //date_limit: a.date_limit !== "" ? new Date(`${m.date_limit.replace(" ","T")}Z`) : null //TODO uncomment after testing
+          date_limit: new Date(),   //TODO remove after testing
+          studentId: selectedEstudiante.id
+        }));  
+      }
       dispatch(mergeTareas(tareas, selectedEstudiante, fechaInicio, fechaFin));
       resolve(tareas);
     })
@@ -56,17 +65,48 @@ export const fetchTareas = (selectedEstudiante, fechaInicio, fechaFin, search, t
   });
 };
 
-export const mergeTareaComentarios = (id, comentarios) => ({
-  type: MERGE_TAREA_COMENTARIOS,
-  id,
-  comentarios
-});
-
-export const fetchTareaComentarios = (selectedEstudiante, id, token) => (dispatch) => { 
+export const insertComentarioTarea = (selectedEstudiante, tarea, text, userData) => (dispatch) => { 
   return new Promise((resolve, reject) => {
     const headers = new Headers();
-    headers.append("token_client", token);
-    fetch(`${config.host}/mobile/student/${selectedEstudiante.id}/activity/${id}/message`, {
+    headers.append("token_client", userData.token);
+    headers.append("Content-Type", "application/json");
+    const today = new Date();
+    const body = {
+      body: text,
+      date: formatFecha(today),
+      type: 'comment'
+    };
+    let url = `${config.host}/mobile/student/${selectedEstudiante.id}/activity/${tarea.id}/message`;
+    fetch(url, {
+      method: 'post',
+      headers: headers,
+      body: JSON.stringify(body),
+    }) 
+    .then(response => {
+      if (response.status === 201) {
+        const updatedBody = Object.assign({}, body, {
+          date: today,
+          author: selectedEstudiante,
+        })
+        dispatch(mergeTareaComentarios(tarea.id, [updatedBody, ...tarea.comentarios]));
+        resolve(body);
+      } else {
+        throw `Server error status: ${response.status}`
+      }
+    })
+    .catch(err => {
+      reject(err)
+    });  
+  });
+};
+
+export const fetchTareaComentarios = (selectedEstudiante, id, userData) => (dispatch) => { 
+  return new Promise((resolve, reject) => {
+    const headers = new Headers();
+    headers.append("token_client", userData.token);
+    headers.append("Content-Type", "application/json");
+    const url = `${config.host}/mobile/student/${selectedEstudiante.id}/activity/${id}/message`;
+    fetch(url, {
       method: 'get',
       headers: headers
     }) 
@@ -74,15 +114,13 @@ export const fetchTareaComentarios = (selectedEstudiante, id, token) => (dispatc
       if (response.status === 200) {
         return response.json()  
       } else {
-        reject({code: response.status, error: 'Server error'})
+        throw `Server error status: ${response.status}`
       }
     })
     .then(responseJson => {
       const comentarios = responseJson.messages.map(m => Object.assign({},m,{
         date: new Date(`${m.date.replace(" ","T")}Z`),
-        author: Object.assign({}, m.author, { // TODO remove after image url is correct
-          imageUrl: 'https://dl.dropboxusercontent.com/s/tyvxa4lr8v56nj8/pic.jpeg?dl=0'
-        })
+        author: Object.assign({}, m.author)
       }));      
       dispatch(mergeTareaComentarios(id, comentarios));
       resolve(comentarios);
@@ -92,76 +130,3 @@ export const fetchTareaComentarios = (selectedEstudiante, id, token) => (dispatc
     });  
   });
 };
-
-// Sample data
-const today = new Date();
-let nextDate = new Date();
-nextDate.setDate(nextDate.getDate() + 2);
-const data = [
-  {
-    id: 1,
-    name: "Ejercicios de matematica",
-    type: {
-      id: 1,
-      name: "Tarea"
-    },
-    state: "Asignada",
-    date_create: today,
-    date_start: today,
-    date_limit: today,
-    date_end: today,
-    date_homework_delivery: today,
-    coordinador: "Lic. Juan Perez",
-    subject: "Matematicas",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
-  },
-  {
-    id: 2,
-    name: "Ejercicios de matematica",
-    type: {
-      id: 2,
-      name: "Leccion"
-    },
-    state: "Asignada",
-    date_create: today,
-    date_start: today,
-    date_limit: today,
-    date_end: today,
-    date_homework_delivery: today,
-    coordinador: "Lic. Juan Perez",
-    subject: "Matematicas",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
-  },
-  {
-    id: 3,
-    name: "Ejercicios de matematica",
-    type: {
-      id: 2,
-      name: "Leccion"
-    },
-    state: "Asignada",
-    date_create: nextDate,
-    date_start: nextDate,
-    date_limit: nextDate,
-    date_end: nextDate,
-    date_homework_delivery: nextDate,
-    coordinador: "Lic. Juan Perez",
-    subject: "Matematicas",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
-  } 
-];
-
-const dataComentatios = [
-  {
-    id: 2,
-    subject: 'Un comentario',
-    date: new Date(),
-    type: 'email',
-    body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
-    author: {
-      id: 1,
-      name: 'Lic. Juan Perez',
-      imageUrl: 'https://dl.dropboxusercontent.com/s/tyvxa4lr8v56nj8/pic.jpeg?dl=0'
-    }
-  }
-]

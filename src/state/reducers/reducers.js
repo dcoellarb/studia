@@ -8,8 +8,9 @@ import tareasReducer from './tareasReducer';
 import tiposTareasReducer from './tiposTareasReducer';
 import estudiantesReducer from './estudiantesReducer';
 import profilesReducer from './profilesReducer';
+import recipientsReducer from './recipientsReducer';
 
-const reducers = combineReducers({
+const appReducer = combineReducers({
   context: contextReducer,
   asistencias: asistenciasReducer,
   calificaciones: calificacionesReducer,
@@ -18,10 +19,19 @@ const reducers = combineReducers({
   tareas: tareasReducer,
   tiposTareas: tiposTareasReducer,
   estudiantes: estudiantesReducer,
-  profiles: profilesReducer
+  profiles: profilesReducer,
+  recipients: recipientsReducer
 });
 
-export default reducers;
+const rootReducer = (state, action) => {
+  if (action.type === 'SET_LOGOUT_CONTEXT') {
+    state = undefined
+  }
+
+  return appReducer(state, action)
+}
+
+export default rootReducer;
 
 import * as contextSelectors from './contextReducer';
 export const getCurrentUser = (state) => {
@@ -79,6 +89,9 @@ import * as tareasSelector from './tareasReducer';
 export const getTareas = (state) => {
   return tareasSelector.getTareas(state.tareas);
 }
+export const getTareaById = (id, state) => {
+  return tareasSelector.getTareaById(id, state.tareas);
+}
 export const getTareasBySelectedStudent = (state) => {
   return tareasSelector.getTareasBySelectedStudent(getSelectedEstudiante(state), state.tareas);
 }
@@ -100,3 +113,9 @@ import * as profilesSelector from './profilesReducer';
 export const getProfiles = (state) => {
   return profilesSelector.getProfiles(state.profiles);
 }
+
+import * as recipientsSelector from './recipientsReducer';
+export const getRecipients = (state) => {
+  return recipientsSelector.getRecipients(state.recipients);
+}
+

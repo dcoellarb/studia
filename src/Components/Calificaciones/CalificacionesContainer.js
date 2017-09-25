@@ -16,6 +16,9 @@ class Calificaciones extends Component {
     .then(() => {
       this.setState({ loading: false });
     })
+    .catch((error) => {
+      this.setState({ loading: false });
+    });  
   }
 
   render() {

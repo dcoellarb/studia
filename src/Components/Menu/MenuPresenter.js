@@ -121,7 +121,12 @@ class MenuPresenter extends Component {
           {this.props.estudiantes.map(e => 
             <TouchableOpacity onPress={() => this.props.setSelectedEstudiante(e)} style={styles.barAction}>
               <View style={[styles.menuItem, {flexDirection: 'row'}]}>
-                <Image style={styles.imageSmallStyle} source={{uri: e.imageUrl}} />
+                {e.avatar && 
+                  <Image style={styles.imageSmallStyle} source={{uri: e.avatar}} />
+                }
+                {!e.avatar && 
+                  <Icon name='account-circle' size={30} color={'gray'} />
+                }
                 <Text style={styles.menuText}>{e.name}</Text>
               </View>
             </TouchableOpacity>
@@ -134,7 +139,12 @@ class MenuPresenter extends Component {
     if (this.props.selectedEstudiante) {
       estudiante1 = (
         <View style={{flexDirection: 'row'}}>
-          <Image style={styles.imageStyle} source={{uri:  this.props.selectedEstudiante.imageUrl}} />
+          {this.props.selectedEstudiante.avatar && 
+            <Image style={styles.imageStyle} source={{uri: this.props.selectedEstudiante.avatar}} />
+          }
+          {!this.props.selectedEstudiante.avatar && 
+            <Icon name='account-circle' size={50} color={'gray'} />
+          }            
           <View style={{marginLeft: 5}}>
             <Text style={styles.smallTextBold} >{this.props.selectedEstudiante.name}</Text>
             <Text style={styles.smallText} >{this.props.selectedEstudiante.email}</Text>
@@ -147,7 +157,12 @@ class MenuPresenter extends Component {
     if (this.props.estudiantes.length > 0) {
       estudiante2 = (
         <TouchableOpacity onPress={() => this.props.setSelectedEstudiante(this.props.estudiantes[0])}>
-          <Image style={[styles.imageSmallStyle, {marginBottom: 5}]} source={{uri: this.props.estudiantes[0].imageUrl}} />
+          {this.props.estudiantes[0].avatar && 
+            <Image style={[styles.imageSmallStyle, {marginBottom: 5}]} source={{uri: this.props.estudiantes[0].avatar}} />
+          }
+          {!this.props.estudiantes[0].avatar && 
+            <Icon name='account-circle' size={30} color={'gray'} />
+          }                  
         </TouchableOpacity>
       );
     }    
@@ -156,7 +171,12 @@ class MenuPresenter extends Component {
     if (this.props.estudiantes.length > 1) {
       estudiante3 = (
         <TouchableOpacity onPress={() => this.props.setSelectedEstudiante(this.props.estudiantes[1])}>
-          <Image style={[styles.imageSmallStyle, {marginBottom: 5}]} source={{uri: this.props.estudiantes[1].imageUrl}} />
+          {this.props.estudiantes[1].avatar && 
+            <Image style={[styles.imageSmallStyle, {marginBottom: 5}]} source={{uri: this.props.estudiantes[1].avatar}} />
+          }
+          {!this.props.estudiantes[1].avatar && 
+            <Icon name='account-circle' size={30} color={'gray'} />
+          }                        
         </TouchableOpacity>
       );
     }    

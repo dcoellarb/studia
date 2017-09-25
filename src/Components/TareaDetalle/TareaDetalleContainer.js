@@ -6,7 +6,7 @@ import * as selectors from './../../state/reducers/reducers';
 
 class TareaDetalle extends Component {
   componentWillMount() {
-    this.props.fetchTareaComentarios(this.props.selectedEstudiante, this.props.tarea.id);
+    this.props.fetchTareaComentarios(this.props.selectedEstudiante, this.props.tarea.id, this.props.currentUser);
   }
 
   render() {
@@ -20,16 +20,17 @@ class TareaDetalle extends Component {
 TareaDetalle.propTypes = {};
 
 const mapStateToProps = (state, ownProps) => ({
+  currentUser: selectors.getCurrentUser(state),
 	navigator: ownProps.navigator,
-  tarea: ownProps.tarea,
+  tarea: selectors.getTareaById(ownProps.tarea.id, state),
   tareaComentarios: selectors.getTareaComentarios(ownProps.tarea.id, state),
   selectedEstudiante: selectors.getSelectedEstudiante(state)
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  fetchTareaComentarios: (selectedEstudiante, id) => {
-    dispatch(actions.tareas.fetchTareaComentarios(selectedEstudiante, id))
-  }  
+  fetchTareaComentarios: (selectedEstudiante, id, userData) => {
+    dispatch(actions.tareas.fetchTareaComentarios(selectedEstudiante, id, userData))
+  }
 });
 
 const TareaDetalleContainer = connect(

@@ -15,6 +15,7 @@ import { globalColors } from './../../styles/globals';
 import { stringifyDate } from './../../utils/formatDate'
 import Loader from './../Loader/Loader';
 import Placeholder from './../Placeholder/Placeholder';
+import HTMLView from 'react-native-htmlview';
 
 const stylesObjects = {
   container: Object.assign({}, globalStyles.barMargin, {
@@ -95,17 +96,21 @@ class NotificacionesPresenter extends Component {
     if (rowData.id === this.state.selectedNotificacion) {
       detalle = (
         <View>
-          <Text style={styles.lightText}>
-            {rowData.body}
-          </Text>
+          <HTMLView style={styles.lightText} value={rowData.body} />
         </View>
       );
     }
+
+    let avatar = (<Icon name='account-circle' size={30} color={'gray'} />);
+    if (rowData.author.avatar && rowData.author.avatar.length > 0) {
+      avatar = (<Image style={styles.imageSmallStyle} source={{uri: rowData.author.avatar}} />);
+    }
+    
     return (
       <TouchableOpacity onPress={() => toggleNotificacion(rowData.id)}>
         <View style={styles.section}>
           <View style={{flexDirection: 'row'}}>
-            <Image style={styles.imageSmallStyle} source={{uri: rowData.author.imageUrl}} />
+            {avatar}
             <View style={{marginLeft: 5}}>
               <Text style={styles.title}>{rowData.subject}</Text>
               <Text style={styles.lightText}>{stringifyDate(rowData.date)}</Text>

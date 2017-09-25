@@ -1,3 +1,3 @@
 export default {
-  host: 'https://academic-mobile.herokuapp.com'
+  host: 'https://openalliance-studia.herokuapp.com'
 }

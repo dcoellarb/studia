@@ -46,8 +46,11 @@ class TareaDetallePresenter extends Component {
   }
 
   handleCerrarSesion() {
-    this.props.cerrarSesion();
-    this.props.navigator.push({index: 99, title: 'Studia'});    
+    this.props.cerrarSesion()
+    .then(() => {
+      this.props.navigator.push({index: 99, title: 'Studia'});
+    })
+    
   }
 
   render() {
@@ -57,7 +60,7 @@ class TareaDetallePresenter extends Component {
           <Text>Perfiles</Text>
           {this.props.profiles.map(profile => 
             <TouchableOpacity onPress={() => this.handleCambiarProfile(profile)}>
-              <Text style={styles.alertText}>{profile.name}</Text>
+              <Text style={styles.alertText}>{profile.mode}</Text>
             </TouchableOpacity> 
           )}
         </View>

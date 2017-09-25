@@ -39,6 +39,10 @@ export const getTareas = (state) => {
   return state;
 }
 
+export const getTareaById = (id, state) => {
+  return state.find(t => t.id === id);
+}
+
 export const getTareasBySelectedStudent = (selectedEstudiante, state) => {
   return state.filter(t => t.studentId === selectedEstudiante.id);
 }

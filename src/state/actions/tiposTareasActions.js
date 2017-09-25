@@ -21,7 +21,7 @@ export const fetchTiposTareas = (selectedEstudiante, userData) => (dispatch) => 
       if (response.status === 200) {
         return response.json()  
       } else {
-        reject({code: response.status, error: 'Server error'})
+        throw `Server error status: ${response.status}`
       }
     })
     .then(responseJson => {

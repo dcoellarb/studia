@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import CambioClavePresenter from './CambioClavePresenter';
+import actions from './../../state/actions/actions';
+import * as selectors from './../../state/reducers/reducers';
 
 class CambioClave extends Component {
   render() {
@@ -14,10 +16,15 @@ class CambioClave extends Component {
 CambioClave.propTypes = {};
 
 const mapStateToProps = (state, ownProps) => ({
-	navigator: ownProps.navigator	
+	navigator: ownProps.navigator,
+  currentUser: selectors.getCurrentUser(state)
 });
 
-const mapDispatchToProps = (dispatch) => ({});
+const mapDispatchToProps = (dispatch) => ({
+	changePassword: (currentPassword, newPassword, userData) => {
+    return dispatch(actions.context.changePassword(currentPassword, newPassword, userData));
+  }
+});
 
 const CambioClaveContainer = connect(
   mapStateToProps,

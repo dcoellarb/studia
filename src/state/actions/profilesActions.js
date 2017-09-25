@@ -2,6 +2,7 @@ import {
 	MERGE_PROFILES,
 } from './actionsTypes';
 import config from './../../config/config';
+import { setContextMode } from './contextActions';
 
 export const mergeProfiles = (profiles, page) => ({
   type: MERGE_PROFILES,
@@ -21,10 +22,11 @@ export const fetchProfiles = (userData) => (dispatch) => {
       if (response.status === 200) {
         return response.json()  
       } else {
-        reject({code: response.status, error: 'Server error'})
+        throw `Server error status: ${response.status}`        
       }
     })
     .then(responseJson => {
+      dispatch(setContextMode(responseJson.profiles[0].id))
       dispatch(mergeProfiles(responseJson.profiles))
       resolve(responseJson.profiles)
     })

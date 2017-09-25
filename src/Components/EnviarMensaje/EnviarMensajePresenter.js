@@ -4,7 +4,8 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  BackAndroid
 } from 'react-native'
 import Autocomplete from 'react-native-autocomplete-input';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -55,7 +56,9 @@ class EnviarMensajePresenter extends Component {
     super(props);
 
     this.state = {
-      currentDestinatario: '',
+      asunto: '',
+      text: '',
+      currentSearch: '',
       showDestinatarios: true,
       destinatarios: []
     }
@@ -64,13 +67,28 @@ class EnviarMensajePresenter extends Component {
     this.destinariosOnBlur = this.destinariosOnBlur.bind(this);
     this.toggleDestinararios = this.toggleDestinararios.bind(this);
     this.handleComentar = this.handleComentar.bind(this);
+    this.handleBack = this.handleBack.bind(this);
   }
-  
+
+  componentWillMount() {
+    BackAndroid.addEventListener('hardwareBackPress', this.handleBack);
+  }
+
+  handleBack() {
+    this.props.navigator.pop();
+    return true;
+  }
+
   addDestinarario() {
     this.setState({
-      destinatarios: [...this.state.destinatarios, {id: 0, nombre: this.state.currentDestinatario}],
+      destinatarios: [...this.state.destinatarios, this.state.currentDestinatario],
     }, () => {
-      this.setState({currentDestinatario: ''})
+      this.setState({
+        currentDestinatario: undefined,
+        currentSearch: '',
+        showDestinatarios: false
+      })
+      this.props.clearRecipients();
     });
   }
 
@@ -83,7 +101,23 @@ class EnviarMensajePresenter extends Component {
   }
 
   handleComentar() {
-
+    if (this.state.asunto.length === 0) {
+      alert('El asunto del mensaje es requirido');
+    }
+    else if (this.state.text.length === 0) {
+      alert('El contenido del mensaje es requerido');
+    }
+    else if (this.state.destinatarios.length === 0) {
+      alert('Necesitar agregar almeno un destinatario');
+    } else {
+      this.props.createMessage(this.props.selectedEstudiante, this.state.asunto, this.state.destinatarios, this.state.text, this.props.currentUser)
+      .then(
+        () => this.props.navigator.pop(),
+        (err) => {
+          alert('No se pudo enviar el mensaje, por favor contactenos')
+        }
+      )
+    }
   }
 
   render() {
@@ -91,20 +125,20 @@ class EnviarMensajePresenter extends Component {
     if (this.state.destinatarios.length > 0) {
       if (this.state.destinatarios.length === 1) {
         destinatario = (
-          <Text style={styles.destinatariosText}>{this.state.destinatarios[0].nombre}</Text>
+          <Text style={styles.destinatariosText}>{this.state.destinatarios[0].name}</Text>
         );
       } else if (this.state.destinatarios.length === 2) {
         destinatario = (
           <View>
-            <Text style={styles.destinatariosText}>{this.state.destinatarios[0].nombre}</Text>
-            <Text style={styles.destinatariosText}>{this.state.destinatarios[1].nombre}</Text>
+            <Text style={styles.destinatariosText}>{this.state.destinatarios[0].name}</Text>
+            <Text style={styles.destinatariosText}>{this.state.destinatarios[1].name}</Text>
           </View>
         );
       } else {
         if (!this.state.showDestinatarios) {
           destinatario = (
             <View>
-              <Text style={styles.destinatariosText}>{this.state.destinatarios[0].nombre}</Text>
+              <Text style={styles.destinatariosText}>{this.state.destinatarios[0].name}</Text>
               <TouchableOpacity onPress={() => this.toggleDestinararios()} style={styles.destinatariosButton}>        
                 <Text style={styles.destinatariosButtonText}>+{this.state.destinatarios.length - 1} destinatarios</Text>
               </TouchableOpacity>        
@@ -114,7 +148,7 @@ class EnviarMensajePresenter extends Component {
           destinatario = (
             <View>
               {this.state.destinatarios.map( d => 
-                <Text style={styles.destinatariosText}>{d.nombre}</Text>
+                <Text style={styles.destinatariosText}>{d.name}</Text>
               )}
             </View>
           );
@@ -122,34 +156,40 @@ class EnviarMensajePresenter extends Component {
       }
     }
 
-    let destinatariosData = ["Daniel Coellar","Danilo Arebalo","David Burbano"];
+    let destinatariosData = this.props.recipients;
+    /*
     if (this.state.currentDestinatario !== '') {
       const regex = new RegExp(`${this.state.currentDestinatario.trim()}`, 'i');
       destinatariosData = destinatariosData.filter(d => d.search(regex) >= 0 );
     } else {
       destinatariosData = [];
     }
+    */
 
     return (
       <View style={styles.container}>
         <View style={styles.section}>
-          <TextInput placeholder="Asunto" style={{ height: 40 }}/>
+          <TextInput
+            onChangeText={(text) => this.setState({ asunto: text})}
+            placeholder="Asunto" style={{ height: 40 }}
+          />
           <View>
             {destinatario}
             <View style={{flexDirection: 'row'}}>
               <Autocomplete
                 data={destinatariosData}
-                defaultValue={this.state.currentDestinatario}
+                defaultValue={this.state.currentDestinatario ? this.state.currentDestinatario.name : ''}
                 renderItem={data => (
                   <TouchableOpacity onPress={() =>
                       this.setState({currentDestinatario: data})
                     }
                   >
-                    <Text>{data}</Text>
+                    <Text>{data.name}</Text>
                   </TouchableOpacity>
                 )}
-
-                onChangeText={text => this.setState({currentDestinatario: text})}
+                onChangeText={text => this.setState({currentSearch: text}, () => {
+                  this.props.fetchRecipients(this.props.selectedEstudiante, this.state.currentSearch, this.props.currentUser);
+                })}
                 onBlur={() => this.destinariosOnBlur()}
                 placeholder="Agregar Destinatario"
                 style={{height: 40}}                
@@ -163,6 +203,7 @@ class EnviarMensajePresenter extends Component {
         <View style={styles.section}>
           <TextInput
             placeholder="Mensaje"
+            onChangeText={(text) => this.setState({ text: text})}
             multiline={true}
             numberOfLines={4}
             style={{ height: 100 }}

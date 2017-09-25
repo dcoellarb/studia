@@ -7,7 +7,8 @@ import {
   HANDLE_NOTIFICACIONES_SEARCH_CHANGE,
   HANDLE_MENSAJES_SEARCH_CHANGE,
   HANDLE_CALENDARIO_FILTRO_CHANGE,
-  SET_SELECTED_ESTUDIANTE
+  SET_SELECTED_ESTUDIANTE,
+  SET_CONTEXT_MODE
 } from './actionsTypes';
 import config from './../../config/config';
 
@@ -15,6 +16,11 @@ export const setLoginContext = (user) => ({
   type: SET_LOGIN_CONTEXT,
   user
 });
+
+export const setContextMode = (mode) => ({
+  type: SET_CONTEXT_MODE,
+  mode  
+})
 
 export const getLoginContext = () => (dispatch) => {
   return new Promise((resolve, reject) => {
@@ -64,18 +70,18 @@ export const login = (username, password) => (dispatch) => {
       if (response.status === 200) {
         return response.json()  
       } else {
-        reject({code: response.status, msg: "Server Errror"});
+        throw `Server error status: ${response.status}`
       }      
     })
     .then(responseJson => {
-      userData = Object.assign({}, responseJson, { mode: 'student' }); // TODO remove once fixed
-      return AsyncStorage.setItem('@Studia:user', JSON.stringify(userData));
+      userData = responseJson
+      return AsyncStorage.setItem('@Studia:user', JSON.stringify(responseJson));
     })
     .then(() => {
       dispatch(setLoginContext(userData));
       resolve(userData);              
     })
-    .catch(err => {      
+    .catch(err => {
       reject(err);
     });
   });
@@ -99,6 +105,60 @@ export const logout = () => (dispatch) => {
     );
   });
 };
+
+export const changePassword = (currentPassword, newPassword, userData) => (dispatch) => {
+  return new Promise((resolve, reject) => {
+    const headers = new Headers();
+    headers.append("token_client", userData.token);
+    headers.append("Content-Type", "application/json");
+    const body = JSON.stringify({
+      current_password: currentPassword,
+      new_password: newPassword
+    });
+    fetch(`${config.host}/mobile/reset_password`, {
+      method: 'put',
+      headers: headers,
+      body: body
+    }) 
+    .then(response => {
+      if (response.status === 200) {
+        resolve();
+      } else {
+        throw `Server error status: ${response.status}`
+      }      
+    })
+    .catch(err => {      
+      reject(err);
+    });
+  });
+};
+
+export const forgotPassword = (email, userData) => (dispatch) => {
+  return new Promise((resolve, reject) => {
+    const headers = new Headers();
+    headers.append("token_client", userData.token);
+    headers.append("Content-Type", "application/json");
+    const body = JSON.stringify({
+      email: email,
+    });
+    fetch(`${config.host}/mobile/forgot_password`, {
+      method: 'post',
+      headers: headers,
+      body: body
+    }) 
+    .then(response => {
+      if (response.status === 200) {
+        resolve();
+      } else {
+        throw `Server error status: ${response.status}`
+      }      
+    })
+    .catch(err => {
+      reject(err);
+    });
+  });
+};
+
 
 export const setCurrentComponent = (componentName) => ({
   type: SET_CURRENT_COMPONENT,

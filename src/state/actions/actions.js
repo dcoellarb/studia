@@ -7,6 +7,7 @@ import * as tareasActions from './tareasActions';
 import * as tiposTareasActions from './tiposTareasActions';
 import * as estudiantesActions from './estudiantesActions';
 import * as profilesActions from './profilesActions';
+import * as recipientsActions from './recipientsActions';
 
 const actions = {
 	context: {...contextActions},
@@ -17,7 +18,8 @@ const actions = {
 	tareas: {...tareasActions},
 	tiposTareas: {...tiposTareasActions},
 	estudiantes: {...estudiantesActions},
-	profiles: {...profilesActions}
+	profiles: {...profilesActions},
+	recipients: {...recipientsActions}
 };
 
 export default actions;

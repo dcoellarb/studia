@@ -1,3 +1,4 @@
+import codePush from "react-native-code-push";
 import React, { Component } from 'react';
 import {
   AppRegistry,
@@ -23,4 +24,7 @@ export default class Studia extends Component {
   }
 }
 
-AppRegistry.registerComponent('Studia', () => Studia);
+let codePushOptions = { checkFrequency: codePush.CheckFrequency.ON_APP_RESUME };
+studia = codePush(codePushOptions)(Studia);
+
+AppRegistry.registerComponent('Studia', () => studia);

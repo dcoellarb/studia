@@ -4,7 +4,8 @@ import {
   View,
   Text,
   ListView,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform,
 } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { globalColors } from './../../styles/globals';
@@ -40,23 +41,28 @@ class CalificacionesPresenter extends Component {
   constructor(props) {
     super(props);
     this.handlePDFView = this.handlePDFView.bind(this);
+    this.renderItem = this.renderItem.bind(this);
   }
 
   handlePDFView(name, url) {
-    this.props.navigator.push({index: 100, title: name, url, userData: this.props.currentUser});
+    if (Platform.OS === 'ios') {
+      this.props.navigator.push({index: 100, title: name, url, userData: this.props.currentUser});      
+    } else {
+      this.props.navigator.push({index: 101, title: name, url, userData: this.props.currentUser});            
+    }
   }
 
-  renderItem(rowData, sectionID, rowID, highlightRow, handlePDFView) {
+  renderItem(rowData, sectionID, rowID, highlightRow) {
     return (
-      <View style={[styles.section, {flexDirection: 'row', justifyContent:'space-between'}]}>
-        <View style={{flexDirection: 'row'}}>
-          <Icon name='description' size={20} color={globalColors.text} />
-          <Text style={styles.title}>{rowData.name}</Text>
-        </View>
-        <TouchableOpacity onPress={() => handlePDFView(rowData.name, rowData.pdfUrl)}>
+      <TouchableOpacity onPress={() => this.handlePDFView(rowData.name, rowData.pdfUrl)}>
+        <View style={[styles.section, {flexDirection: 'row', justifyContent:'space-between'}]}>
+          <View style={{flexDirection: 'row'}}>
+            <Icon name='description' size={20} color={globalColors.text} />
+            <Text style={styles.title}>{rowData.name}</Text>
+          </View>
           <Icon name='file-download' size={30} color={globalColors.secondary} />
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
     );
   }
 
@@ -83,7 +89,7 @@ class CalificacionesPresenter extends Component {
             <ListView
               enableEmptySections={true}
               dataSource={dataSource.cloneWithRows(itemsMap)}
-              renderRow={(rowData, sectionID, rowID, highlightRow) => this.renderItem(rowData, sectionID, rowID, highlightRow, this.handlePDFView)}
+              renderRow={(rowData, sectionID, rowID, highlightRow) => this.renderItem(rowData, sectionID, rowID, highlightRow)}
               removeClippedSubviews={false}
             />
           </View>

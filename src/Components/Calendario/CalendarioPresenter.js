@@ -123,7 +123,14 @@ class CalendarioPresenter extends Component {
   }
 
   handleSelectTarea(tarea) {
-    this.props.navigator.push({index: 1, title: 'Detalle', tarea});
+    this.props.navigator.push(
+      {
+        index: 1,
+        title: tarea.name,
+        subtitle: tarea.subject,
+        tarea
+      }
+    );
   }
 
   changeSelectedDate(date) {

@@ -1,3 +1,4 @@
 <resources>
+    <string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey">tkk_TXjZgX8QdG5lAKz_Ftkrnwdv0475a724-2a12-4f3f-b1b8-8f3283be762b</string>
     <string name="app_name">Studia</string>
 </resources>
